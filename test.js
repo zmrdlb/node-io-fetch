@@ -1,4 +1,4 @@
-const Model from './model';
+const Model = require('./model');
 
 Model.listdata({
      data: {

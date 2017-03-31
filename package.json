@@ -1,0 +1,30 @@
+{
+  "name": "node-io-fetch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "interstart": "node iointer.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zmrdlb/node-io-fetch.git"
+  },
+  "keywords": ["fetch"],
+  "author": {
+    "name": "zmrdlb",
+    "email": "592044573@qq.com"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zmrdlb/node-io-fetch/issues"
+  },
+  "homepage": "https://github.com/zmrdlb/node-io-fetch#readme",
+  "dependencies": {
+    "extend": "^3.0.0",
+    "multiparty": "^4.1.2",
+    "querystring": "^0.2.0",
+    "whatwg-fetch": "^2.0.3"
+  }
+}

@@ -13,13 +13,12 @@ const querystring = require('querystring');
  */
 function formatFormData(data){
     var _formdata = new FormData();
-    data = Object.entries(data);
-    for(var pair of data){
-        var [key, val] = pair;
+    for(var key in data){
+        var val = data[key];
         if(val == undefined){
             continue;
         }else if(val.constructor == Array){
-            val.forEach((v,i) => {
+            val.forEach(function(v,i){
                 _formdata.append(key,v);
             });
             continue;

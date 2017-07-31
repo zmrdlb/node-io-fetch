@@ -46,7 +46,6 @@ IoConfig.ioparams.error = function(error){
 /**
  * 业务错误处理
  * @param  {[type]} result   [description]
- * @param  {[type]} response [description]
  * @return {[type]}          [description]
  */
 IoConfig.ioparams.fail = function(result){

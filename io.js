@@ -91,34 +91,41 @@ module.exports = {
                 setTimeout(reject,conf.timeout,new Error('请求超时'));
             })
         ]);
-        race.then(function(response){
-            if(response.ok) { //response.status [200,299]
-                response[conf.type]().then(function(result){
-                    if(conf.dealfail){ //处理业务错误
-                        if(IoConfig.fail.filter(result)){ //有业务错误发生
-                            conf[IoConfig.fail.funname](result,response);
-                        }else{ //无业务错误发生
-                            if(conf.dealdata){
-                                conf.success(conf.dealdatafun(result),response);
-                            }else{
-                                conf.success(result,response);
+
+        return new Promise(function(resolve,reject){
+            race.then(function(response){
+                if(response.ok) { //response.status [200,299]
+                    response[conf.type]().then(function(result){
+                        if(conf.dealfail){ //处理业务错误
+                            if(IoConfig.fail.filter(result)){ //有业务错误发生
+                                if(typeof conf[IoConfig.fail.funname] == 'function'){ //判断默认fail是否是一个有效函数
+                                    conf[IoConfig.fail.funname](result);
+                                }
+                                reject(result);
+                            }else{ //无业务错误发生
+                                if(conf.dealdata){
+                                    resolve(conf.dealdatafun(result));
+                                }else{
+                                    resolve(result);
+                                }
                             }
+                        }else{
+                            resolve(result);
                         }
-                    }else{
-                        conf.success(result,response);
-                    }
-                },function(error){
+                    },function(error){
+                        throw error;
+                    });
+                }else{
+                    var error = new Error(response.statusText || '网络错误')
                     throw error;
-                });
-            }else{
-                var error = new Error(response.statusText || '网络错误')
-                throw error;
-            }
-            conf.complete();
-        }).catch(function(error){
-            //捕获任何错误，即发生语法错误也会捕获
-            conf.error(error);
-            conf.complete();
+                }
+                conf.complete();
+                conf.getResponse(response);
+            }).catch(function(error){
+                //捕获任何错误，即发生语法错误也会捕获
+                conf.error(error);
+                conf.complete();
+            });
         });
     }
 };

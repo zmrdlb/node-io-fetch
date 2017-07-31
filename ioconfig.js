@@ -40,7 +40,7 @@
          * include: 跨域发送cookie
          * @type {String}
          */
-        credentials: 'same-origin'
+        credentials: 'include'
     }
 };
 
@@ -89,6 +89,14 @@ that.ioparams = {
 
     },
     /**
+     * 获取fetch返回的response对象。fail,then和catch发生的时候，可以获取到此对象
+     * @param {Response} response 返回的response对象
+     * @return {[type]}          [description]
+     */
+    getResponse: function(response){
+
+    },
+    /**
      * 对于接口返回错误，一般因为网络原因，进行的统一处理
      */
     error: function(error){
@@ -97,23 +105,13 @@ that.ioparams = {
     },
     /**
      * 如果fail配置了funname为fail,则调用此方法. 此时fail.filter返回true
+     * 在此可进行统一业务错误处理
      * @param {Object|Other} result 接口返回数据
-     * @param {Response} response 返回的response对象
      * @return {[type]} [description]
      */
-    fail: function(result,response){
+    fail: function(result){
         //Alert.alert('系统消息',result.errmsg || '亲，忙不过来了');
     },
-    /**
-     * 成功调用方法。调用的情况有如下几种：
-     * 1. dealfail为true, 则fail.filter返回false时，调用success
-     *          此时如果dealdata为true, 则result为dealdatafun返回的数据
-     * 2. dealfail为false时，则接口返回后直接调用此方法（不发生error的情况下）
-     *
-     * @param {Object|Other} result 接口返回数据
-     * @param {Response} response 返回的response对象
-     */
-    success: function(result,response){},
     /**
      * 接口请求完毕调用。无论success,fail,error
      * @return {[type]} [description]
@@ -136,6 +134,34 @@ that.ioparams = {
      * @type {Boolean}
      */
     dealdata: true
+};
+
+/**
+ * 本来下面这两项配置是放在that.ioparams里面的，但是后面改版，采用promise方式传递以下这两项。
+ * 也就是说，that.iocallback其实是个介绍，并无实际意义
+ * @type {Object}
+ */
+that.iocallback = {
+    /**
+     * 业务错误处理。
+     * 如果fail配置了funname为fail，并且fail.filter返回true，则默认调用that.ioparams.fail处理方法
+     * 配置了catch，也会调用catch
+     * 如果配置了io请求参数fail为null，则不会调用that.ioparams.fail
+     * @param {Object|Other} result 接口返回数据
+     * @return {[type]} [description]
+     */
+    catch: function(result){
+        //Alert.alert('系统消息',result.errmsg || '亲，忙不过来了');
+    },
+    /**
+     * 成功调用方法。调用的情况有如下几种：
+     * 1. dealfail为true, 则fail.filter返回false时，调用success
+     *          此时如果dealdata为true, 则result为dealdatafun返回的数据
+     * 2. dealfail为false时，则接口返回后直接调用此方法（不发生error的情况下）
+     *
+     * @param {Object|Other} result 接口返回数据
+     */
+    then: function(result){}
 };
 
 module.exports = that;

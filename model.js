@@ -49,7 +49,7 @@ IoConfig.ioparams.error = function(error){
  * @param  {[type]} response [description]
  * @return {[type]}          [description]
  */
-IoConfig.ioparams.fail = function(result,response){
+IoConfig.ioparams.fail = function(result){
     if(result.code == 'A0002'){
         console.log('未登录');
     }else{
@@ -66,7 +66,7 @@ IoConfig.ioparams.fail = function(result,response){
 module.exports = {
     //listdata接口
     listdata(opt){
-        Io.request(extend(true,{
+        return Io.request(extend(true,{
             request: {
                 method: 'POST'
             },

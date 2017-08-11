@@ -89,7 +89,7 @@ that.ioparams = {
 
     },
     /**
-     * 获取fetch返回的response对象。fail,then和catch发生的时候，可以获取到此对象
+     * 获取fetch返回的response对象。接口请求成功（业务成功和失败都算）时可以获取到
      * @param {Response} response 返回的response对象
      * @return {[type]}          [description]
      */
@@ -97,7 +97,7 @@ that.ioparams = {
 
     },
     /**
-     * 对于接口返回错误，一般因为网络原因，进行的统一处理
+     * 对于接口返回错误或超时，一般因为网络原因，进行的统一处理
      */
     error: function(error){
         //error或有或无 error.message

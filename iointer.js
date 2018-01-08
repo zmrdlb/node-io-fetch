@@ -71,6 +71,17 @@ http.createServer((req,res) => {
                         console.log(argsobj);
                         writeres(res,req);
                     });
+                }else if(/application\/json/.test(contentType)){
+                  console.log('application/json');
+                  var postdata = '';
+                  req.on('data',(data) => {
+                      postdata += data;
+                  });
+                  req.on('end',() => {
+                      var argsobj = JSON.parse(postdata);
+                      console.log(argsobj);
+                      writeres(res,req);
+                  });
                 }else{
                     writeempty(res,req);
                 }

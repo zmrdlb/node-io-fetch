@@ -21,7 +21,9 @@
   "homepage": "https://github.com/zmrdlb/node-io-fetch#readme",
   "dependencies": {
     "extend": "^3.0.0",
+    "install": "^0.10.2",
     "multiparty": "^4.1.2",
+    "npm": "^5.6.0",
     "querystring": "^0.2.0",
     "whatwg-fetch": "^2.0.3"
   },

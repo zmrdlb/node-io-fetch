@@ -1,15 +1,21 @@
 # node-io-fetch
 
-可通过参数配置，针对业务，考虑到兼容性，使用 [whatwg-fetch](https://github.com/github/fetch#readme) 封装的 io接口请求npm包。
+为了便于业务开发，对 fetch 封装。考虑到兼容性，使用 [whatwg-fetch](https://github.com/github/fetch#readme)。此次封装提供了以下功能：
 
-# 前言
-
-学习react-native的时候，知道了[fetch api](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API)，新的资源获取语法，比XmlHttpRequest具有更强大的功能：易读性、抽象性、简洁性、支持各种类型资源请求等。
-现在对于fetch的使用，封装了一层，提取了便于开发者配置和使用的api.
-
-[using fetch](https://developer.mozilla.org/zh-CN/docs/Web/API/Fetch_API/Using_Fetch)
-
-引用whatwg-fetch，对io请求进行业务层的封装，便于统一处理io业务逻辑。
+1. **对所有接口增加统一的“阀门”，统一预处理 request 和 response。** 开发者只需关心具体业务，无需关心其他细节处理。这点在后期项目迭代中可渐渐发挥优势。如：开发一段时间后，后端要求所有接口都增加 ajax=1 的参数，之前遇到过的情况。如果按照普通方式，开发者需要全局搜索使用了原生 Fetch API 的地方，然后给每个接口的 data 新增 ajax=1。这一操作修改多处地方。如果开发者使用了 node-io-fetch 提供的方法，则无需烦恼，因为只需在 response “阀门” 里，对待发送的 data 新增 ajax=1。这一操作只需修改一处地方。
+2. 一般一个项目里，前后端会约定接口返回的格式，如：
+``` javascript
+{
+   status: true|false, // 所处理业务的状态，成功或失败
+   data: any, // 当 status 为 true 时，返回的数据
+   message: '错误信息' // 当 status 为 false 时，返回的提示信息
+}
+```
+**node-io-fetch 借用 “response 阀门”，根据“接口约定”统一判断业务的成功或失败。** 
+3. **node-io-fetch 提供的 request method 返回 promise。** 结合 responseTap 和 promise，开发者无需自行判断，只需在成功和失败的回调里处理各自的逻辑。
+**node-io-fetch 借用 “response 阀门”，根据“接口约定”统一判断业务的成功或失败。** 此外 node-io-fetch 提供的 request method 返回 promise。结合这两点，开发者无需自行判断返回的数据，只需在成功和失败的回调里处理各自的逻辑。
+4. **新增统一的错误处理 error 入口。**。
+5. **所有的默认配置都可在项目中自行修改。**
 
 # 浏览器兼容性
 
@@ -29,79 +35,64 @@ npm install node-io-fetch --save
 - model.js
 
 ```
-const {IoConfig,Io} = require('node-io-fetch');
+const {Config,AppFetch} = require('node-io-fetch');
 const extend = require('extend');
 
 /**
  * 设置自己的配置
  */
 
- /**
-  * 业务错误条件配置
-  * @param  {[type]} result [description]
-  * @return {[type]}        [description]
-  */
-IoConfig.fail.filter = function(result){
-    if(result.code != 'A0001'){
-        return true; //说明发生了业务错误
-    }else{
-        return false;
-    }
-}
-
-/**
- * io请求发送前执行
- * @return {[type]} [description]
- */
-IoConfig.ioparams.beforeSend = function(){
-    console.log('请求开始');
-}
-
 /**
  * io请求结束后
  */
-IoConfig.ioparams.complete = function(){
+Config.ioparams.complete = function(){
     console.log('请求结束')
 }
 
 /**
- * 网络错误或者系统错误
- * @param  {[type]} error [description]
- * @return {[type]}       [description]
+ * 根据服务器返回的数据，判断接口成功或失败
  */
-IoConfig.ioparams.error = function(error){
-    //error或有或无 error.message
-    console.log(error.message || '亲，忙不过来了');
-}
-
-/**
- * 业务错误处理
- * @param  {[type]} result   [description]
- * @return {[type]}          [description]
- */
-IoConfig.ioparams.fail = function(result){
-    if(result.code == 'A0002'){
-        console.log('未登录');
+Config.ioparams.responseTap = function(data,response){
+    if(data && !data.status){
+        return false; //说明发生了业务错误
     }else{
-        console.log(result.errmsg || '亲，忙不过来了');
+        return true;
     }
 }
 
 /**
- * 调用以下方法的时候，opt如ioparams。但是一般只传以下参数就可以了：
- *   data success
- *   以下方法已经统一处理了，如果想覆盖自行传入
- *   beforeSend error fail complete
+ * 统一错误处理
  */
+Config.ioparams.error = function(errorType,error,response) {
+    if(errorType == 'tap'){
+        console.log(error);
+    }else if(errorType == 'parse-fail' || errorType == 'status-code'){
+        console.log(error.message, response.status);
+    }else if(errorType == 'error'){
+        console.log(error.message);
+    }
+}
+
+
 module.exports = {
-    //listdata接口
-    listdata(opt){
-        return Io.request(extend(true,{
+    fetch(params){
+        return AppFetch.request(params);
+    },
+    get(params){
+        extend(true,params,{
+            request: {
+                method: 'GET'
+            }
+        });
+        return this.fetch(params);
+    },
+    post(params){
+        extend(true,params,{
             request: {
                 method: 'POST'
-            },
-            url: 'http://127.0.0.1:8000/listdata'
-        },opt));
+            }
+        });
+        return this.fetch(params);
     }
 };
 ```
@@ -111,7 +102,8 @@ module.exports = {
 ```
 const Model = require('./model');
 
-Model.listdata({
+Model.post({
+     url: 'http://127.0.0.1:8000/listdata',
      data: {
          username: 'zmr',
          sex: '女'
@@ -120,12 +112,10 @@ Model.listdata({
      getResponse: function(response){
          console.log(response);
      }
-     //不接受统一的业务错误处理IoConfig.ioparams.fail
-     //  fail: null
-}).then(function(list){ //业务返回正确
+}).then(function(list){ //成功
      console.log(list);
-}).catch(function(result){ //业务错误
-     console.log(result.errmsg);
+}).catch(function(errorType,error,response){ //失败
+     console.log(errorType,error.message);
 });
 
 ```
@@ -134,7 +124,7 @@ Model.listdata({
 
 - 将node-io-fetch中的model.js拷贝在具体项目里，此处举例存放路径为：common/model.js
 
-- 切换到目录react-native-io-fetch下，运行npm run interstart, 开启node接口模拟
+- 切换到目录node-io-fetch下，运行npm run interstart, 开启node接口模拟
 
 - 将node-io-fetch中的test.js拷贝到具体业务js，调用配置的接口
 
@@ -144,22 +134,15 @@ Model.listdata({
 
 设计其实很简单，分为2部分：
 
-- ioconfig.js: 接口参数默认配置声明
+- config.js: 请求参数默认配置声明
 
-- io.js: 具体发送接口请求方法
+- app-fetch.js: 具体发送请求以及处理响应的逻辑
 
 # API
 
-## IoConfig
+## Config
 
-io接口请求配置，并声明了默认值：
-
-### IoConfig.fail：对接口返回的业务数据，判断是否发送了业务错误
-
-  Name  |  默认值  |  说明  
-----    |----      |----
-funname | 'fail' | 当发生业务错误时，调用的方法名
-filter | function(result){return false} | 返回true,则说明发送了业务错误
+请求配置，并声明了默认值：
 
 ### IoConfig.headers：请求头部配置
 
@@ -190,46 +173,50 @@ isformdata| false | 如果data是json，是否将data转换成FormData格式进�
 url | '' | 接口url
 type | 'json' | 请求的数据类型。[数据类型和response对象获取返回结果的方法对应关系说明](#response-tb)
 timeout | 6000 | 超时时间，毫秒
-beforeSend | function(){} | io请求前，统一的处理
 getResponse | function(response){} | 获取fetch返回的response对象。接口请求成功（不管业务成功或失败）可以获取到此对象
-error | function(error){} | 接口请求错误或超时调用此方法。error或有或无error.message 
-fail | function(result){} | 统一业务错误处理方法。如果IoConfig.fail.funname为fail，则当IoConfig.fail.filter返回true时，调用此方法。result为接口返回的数据。如果此项配置为null，则不会调用此方法
-dealfail | true | 是否进行统一业务错误处理
+error | function(errorType,error,response){} | 对 fetch 请求发生的各种错误进行的统一处理。主要包括：1. status code 不在 [200,299) 范围内，统一的处理。如，未登录，弹出登录弹窗等；2. 对于错误的信息提示等。参数说明同 [iocallback.catch](#fetch-error)
 complete | function(){} | 接口请求完毕调用的方法，无论成功或失败 
-dealdata | true | 当接口返回业务成功时，调用IoConfig.iocallback.then前，是否统一格式化数据
-dealdatafun | function(result){return result.data} | 如果dealdata为true, 则IoConfig.iocallback.then的result为此方法返回的数据
+requestTap | function(request){return request;} | request 阀门，返回处理后的 Request 对象。调用时机：将 request 传递给 fetch 之前。
+responseTap | function(data,response){return true;} | response 阀门，返回 boolean 判断业务成功的与失败（true成功；false失败）。调用时机：收到了服务器返回的数据，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析。
 
 - IoConfig.iocallback：接口结果获取说明
 
-此项没有实际意义。由于Io.request(...)返回的是一个Promise对象，then和catch的回调只能在此说明
+此项没有实际意义。由于AppFetch.request(...)返回的是一个Promise对象，then和catch的回调只能在此说明
 
-- catch: function(result){...}
+<a id="fetch-error"></a>
+- catch: function(errorType,error,response){...}
 
-  接口业务错误，则调用此方法。
+  业务错误回调方法。参数说明：
   
-  - 如果IoConfig.fail.filter返回为true, 说明发生了业务错误，则调用catch。如果dealfail为true，也会调用IoConfig.ioparams.fail方法。
-
-  - result 为接口返回数据
+  1. errorType 错误类型
+     - 'tap': 收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析，且经 “response 阀门” 判断，请求失败
+     - 'parse-fail': 收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，解析返回的数据失败
+     - 'status-code': 收到了服务器响应，且 status code 不在 [200,299) 范围内
+     - 'error': fetch 请求发生了 network error，没有收到服务器响应；接口请求超时；其他语法错误等
+  2. error，按照 errorType 来分类说明：
+     - 'tap': error 是服务器返回数据
+     - 'parse-fail || 'status-code' || 'error': error 是 Error 对象，一般读取 error.message 可获取具体错误说明
+  3. response，Response 对象，只有以下 errorType 才有此参数：'tap','parse-fail','status-code'
 
 - then: function(result){...}
 
-  成功调用方法。调用的情况有如下几种：
+  收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析。经 “response 阀门” 判断，请求成功。如果 “response 阀门” 为 null，则直接判断为请求成功。
   
-  - 1. dealfail为true, 则IoConfig.fail.filter返回false时，调用then。此时如果dealdata为true, 则result为dealdatafun返回的数据；
+  参数说明：
   
-  - 2. dealfail为false时，则接口返回后直接调用此方法（不发生error的情况下）
+  1. data: 解析后的数据
 
-## Io
+## AppFetch
 
-接口请求方法封装
+Fetch 封装
 
-### Io.request(ioparams)
+### AppFetch.request(ioparams)
 
 发起接口请求。
 
 - ioparams：格式同IoConfig.ioparams
 
-- 返回Promise对象，then和catch处理方法说明，分别对应IoConfig.iocallback的then和catch
+- 返回Promise对象，then和catch处理方法说明，分别对应Config.iocallback的then和catch
 
 # 附录
 

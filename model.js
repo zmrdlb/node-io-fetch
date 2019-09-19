@@ -1,5 +1,5 @@
 const {Config,AppFetch} = require('node-io-fetch');
-const Config = require('./config');
+const extend = require('extend');
 
 /**
  * 设置自己的配置

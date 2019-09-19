@@ -79,7 +79,7 @@ that.ioparams = {
     /**
      * 对 fetch 请求发生的各种错误进行的统一处理。主要包括：
      * 1. status code 不在 [200,299) 范围内，统一的处理。如，未登录，弹出登录弹窗等。
-     * 2. 对于错误的信息提示
+     * 2. 对于错误的信息提示等
      *
      * 参数说明同 that.iocallback.catch
      *
@@ -124,9 +124,9 @@ that.ioparams = {
      * 调用时机：收到了服务器返回的数据，且 status code 在 [200,299) 范围内，且根据设置的 type 参数
      * 指定的数据类型，将返回的数据成功解析。
      * 返回的数据解析为指定类型
-     * @param {Any} data 返回的数据解析后的结果。data 的数据类型与 type 参数有关。
+     * @param {Any} data 解析后的数据。data 的数据类型与 type 参数有关。
      * @param {Response} response Response 对象
-     * @return {Boolean} 结合返回的 data 与 response 判断当前接口成功或失败。
+     * @return {Boolean} 结合返回的 data 与 response 判断业务成功的与失败。
      *                   true: 成功；false: 失败；
      */
     responseTap(data,response) {
@@ -169,11 +169,15 @@ that.iocallback = {
     },
     /**
      * 成功处理。
-     * 经 “response 阀门” 判断，请求成功
      *
-     * @param {Object|Other} result 接口返回数据
+     * 收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数
+     * 指定的数据类型，将返回的数据成功解析。
+     *
+     * 经 “response 阀门” 判断，请求成功。如果 “response 阀门” 为 null，则直接判断为请求成功。
+     *
+     * @param {Any} data 解析后的数据
      */
-    then: function(result){}
+    then: function(data){}
 };
 
 module.exports = that;

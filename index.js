@@ -1,2 +1,2 @@
-exports.Io = require('./io');
-exports.IoConfig = require('./ioconfig');
+exports.AppFetch = require('./app-fetch');
+exports.Config = require('./config');

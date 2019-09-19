@@ -1,6 +1,7 @@
 const Model = require('./model');
 
-Model.listdata({
+Model.post({
+     url: 'http://127.0.0.1:8000/listdata',
      data: {
          username: 'zmr',
          sex: '女'
@@ -9,15 +10,14 @@ Model.listdata({
      getResponse: function(response){
          console.log(response);
      }
-     //不接受统一的业务错误处理IoConfig.ioparams.fail
-     //  fail: null
-}).then(function(list){ //业务返回正确
+}).then(function(list){ //成功
      console.log(list);
-}).catch(function(result){ //业务错误
-     console.log(result.errmsg);
+}).catch(function(errorType,error){ //失败
+     console.log(errorType,error.message);
 });
 
-Model.listdata({
+Model.post({
+     url: 'http://127.0.0.1:8000/listdata',
      data: JSON.stringify({
          username: 'zmr',
          sex: '女',
@@ -33,10 +33,8 @@ Model.listdata({
      getResponse: function(response){
          console.log(response);
      }
-     //不接受统一的业务错误处理IoConfig.ioparams.fail
-     //  fail: null
-}).then(function(list){ //业务返回正确
+}).then(function(list){ //成功
      console.log(list);
-}).catch(function(result){ //业务错误
-     console.log(result.errmsg);
+}).catch(function(errorType,error){ //失败
+     console.log(errorType,error.message);
 });

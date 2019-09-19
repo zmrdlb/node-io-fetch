@@ -1,10 +1,14 @@
 /**
- * @fileoverview io请求总a
+ * @fileoverview 为了便于业务开发，对 fetch 进行了封装
  */
 require('whatwg-fetch');
-const IoConfig = require('./ioconfig');
+const Config = require('./config');
 const extend = require('extend');
 const querystring = require('querystring');
+
+function isFunction(data){
+    return typeof data == 'function';
+}
 
 /**
  * 将data格式化成FormData
@@ -32,7 +36,7 @@ function formatFormData(data){
 module.exports = {
     /**
      * 发起io请求
-     * @param  {JSON} ioparams 同ioconfig.ioparams
+     * @param  {JSON} ioparams 同Config.ioparams
      * @return {[type]}          [description]
      */
     request: function(ioparams) {
@@ -42,7 +46,7 @@ module.exports = {
         }
         var conf = {};
 
-        extend(true,conf,IoConfig.ioparams,ioparams);
+        extend(true,conf,Config.ioparams,ioparams);
 
         conf.request.method = conf.request.method.toUpperCase();
 
@@ -78,13 +82,14 @@ module.exports = {
             }
         }
 
-        //发起请求
+        // 创建 request 对象并预处理
         conf.request.headers = conf.headers;
         var myrequest = new Request(conf.url,conf.request);
+        if(isFunction(conf.requestTap)){
+            myrequest = conf.requestTap(myrequest);
+        }
 
-        //请求发起前统一处理
-        conf.beforeSend();
-
+        //发起请求
         var race = Promise.race([
             fetch(myrequest),
             new Promise(function(resolve,reject){
@@ -96,36 +101,34 @@ module.exports = {
             race.then(function(response){
                 if(response.ok) { //response.status [200,299]
                     response[conf.type]().then(function(result){
-                        if(conf.dealfail){ //处理业务错误
-                            if(IoConfig.fail.filter(result)){ //有业务错误发生
-                                if(typeof conf[IoConfig.fail.funname] == 'function'){ //判断默认fail是否是一个有效函数
-                                    conf[IoConfig.fail.funname](result);
-                                }
-                                reject(result);
-                            }else{ //无业务错误发生
-                                if(conf.dealdata){
-                                    resolve(conf.dealdatafun(result));
-                                }else{
-                                    resolve(result);
-                                }
-                            }
-                        }else{
+                        var isSuccess = true;
+
+                        if(isFunction(conf.reponseTap)){
+                            isSuccess = conf.reponseTap(result);
+                        }
+
+                        if(isSuccess){ //有业务错误发生
+                            reject('tap',result,response);
+                        }else{ //无业务错误发生
                             resolve(result);
                         }
                     },function(error){
-                        throw error;
+                        reject('parse-fail', new Error(`将返回数据解析成 ${conf.type} 失败`),response);
                     });
                 }else{
-                    var error = new Error(response.statusText || '网络错误')
-                    throw error;
+                    reject('status-code', new Error(response.statusText || response.status),response);
                 }
                 conf.complete();
                 conf.getResponse(response);
             }).catch(function(error){
                 //捕获任何错误，即发生语法错误也会捕获
-                conf.error(error);
+                reject('error',error);
                 conf.complete();
             });
+        }).catch(function(errorType,error,response){
+            if(isFunction(conf.error)){
+                conf.error(...arguments);
+            }
         });
     }
 };

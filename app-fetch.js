@@ -92,13 +92,13 @@ module.exports = {
         //发起请求
         var race = Promise.race([
             fetch(myrequest),
-            new Promise(function(resolve,reject){
+            new Promise((resolve,reject) => {
                 setTimeout(reject,conf.timeout,new Error('请求超时'));
             })
         ]);
 
-        return new Promise(function(resolve,reject){
-            race.then(function(response){
+        return new Promise((resolve,reject) => {
+            race.then(response => {
                 if(response.ok) { //response.status [200,299]
                     response[conf.type]().then(function(result){
                         var isSuccess = true;
@@ -107,27 +107,45 @@ module.exports = {
                             isSuccess = conf.reponseTap(result);
                         }
 
-                        if(isSuccess){ //有业务错误发生
-                            reject('tap',result,response);
-                        }else{ //无业务错误发生
+                        if(isSuccess){ //无业务错误发生
                             resolve(result);
+                        }else{ //有业务错误发生
+                            reject({
+                                errorType: 'tap',
+                                error: result,
+                                response: response
+                            });
                         }
                     },function(error){
-                        reject('parse-fail', new Error(`将返回数据解析成 ${conf.type} 失败`),response);
+                        reject({
+                            errorType: 'parse-fail',
+                            error: new Error(`将返回数据解析成 ${conf.type} 失败`),
+                            response: response
+                        });
                     });
                 }else{
-                    reject('status-code', new Error(response.statusText || response.status),response);
+                    reject({
+                        errorType: 'status-code',
+                        error: new Error(response.statusText || response.status),
+                        response: response
+                    });
                 }
-                conf.complete();
+
                 conf.getResponse(response);
-            }).catch(function(error){
+            }).catch(error => {
                 //捕获任何错误，即发生语法错误也会捕获
-                reject('error',error);
-                conf.complete();
+                reject({
+                    errorType: 'error',
+                    error: error
+                });
             });
         }).catch(function(errorType,error,response){
             if(isFunction(conf.error)){
                 conf.error(...arguments);
+            }
+        }).finally(() => {
+            if(isFunction(conf.complete)){
+                conf.complete();
             }
         });
     }

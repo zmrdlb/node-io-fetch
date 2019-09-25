@@ -174,7 +174,7 @@ url | '' | 接口url
 type | 'json' | 请求的数据类型。[数据类型和response对象获取返回结果的方法对应关系说明](#response-tb)
 timeout | 6000 | 超时时间，毫秒
 getResponse | function(response){} | 获取fetch返回的response对象。接口请求成功（不管业务成功或失败）可以获取到此对象
-error | function(errorType,error,response){} | 对 fetch 请求发生的各种错误进行的统一处理。主要包括：1. status code 不在 [200,299) 范围内，统一的处理。如，未登录，弹出登录弹窗等；2. 对于错误的信息提示等。参数说明同 [iocallback.catch](#fetch-error)
+error | function({errorType,error,response}){} | 对 fetch 请求发生的各种错误进行的统一处理。主要包括：1. status code 不在 [200,299) 范围内，统一的处理。如，未登录，弹出登录弹窗等；2. 对于错误的信息提示等。参数说明同 [iocallback.catch](#fetch-error)
 complete | function(){} | 接口请求完毕调用的方法，无论成功或失败 
 requestTap | function(request){return request;} | request 阀门，返回处理后的 Request 对象。调用时机：将 request 传递给 fetch 之前。
 responseTap | function(data,response){return true;} | response 阀门，返回 boolean 判断业务成功的与失败（true成功；false失败）。调用时机：收到了服务器返回的数据，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析。
@@ -184,7 +184,7 @@ responseTap | function(data,response){return true;} | response 阀门，返回 b
 此项没有实际意义。由于AppFetch.request(...)返回的是一个Promise对象，then和catch的回调只能在此说明
 
 <a id="fetch-error"></a>
-- catch: function(errorType,error,response){...}
+- catch: function({errorType,error,response}){...}
 
   业务错误回调方法。参数说明：
   

@@ -12,8 +12,10 @@ Model.post({
      }
 }).then(function(list){ //成功
      console.log(list);
-}).catch(function(errorType,error,response){ //失败
+}).catch(function({errorType,error,response}){ //失败
      console.log(errorType,error.message);
+}).finally(function(){
+    console.log('请求结束')
 });
 
 Model.post({
@@ -35,6 +37,8 @@ Model.post({
      }
 }).then(function(list){ //成功
      console.log(list);
-}).catch(function(errorType,error){ //失败
+}).catch(function({errorType,error,response}){ //失败
      console.log(errorType,error.message);
+}).finally(function(){
+    console.log('请求结束')
 });

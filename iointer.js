@@ -35,7 +35,7 @@ function writeres(res,req){
     res.end(JSON.stringify({
         code: 'A0001',
         data: dataBlob,
-        errmsg: '接口返回的错误信息'
+        message: '接口返回的错误信息'
     }),'utf8');
 }
 

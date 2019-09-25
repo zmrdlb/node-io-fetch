@@ -96,12 +96,6 @@ that.ioparams = {
     },
 
     /**
-     * 接口请求完毕调用。无论success,fail,error
-     * @return {[type]} [description]
-     */
-    complete(){},
-
-    /**
     * 阀门
     * 如果给以下配置设置为 null，则表示禁用相关处理。
     *   requestTap
@@ -140,13 +134,13 @@ that.ioparams = {
 };
 
 /**
- * 本来下面这两项配置是放在that.ioparams里面的，但是后面改版，采用promise方式传递以下这两项。
- * 也就是说，that.iocallback其实是个介绍，并无实际意义
+ * 对于 app-fetch.js 的 fetch 返回的 promise，回调说明。
+ * that.iocallback其实是个介绍，并无实际意义
  * @type {Object}
  */
 that.iocallback = {
     /**
-     * 失败处理
+     * 请求失败处理
      *
      * @param {String} errorType 错误类型
      *    'tap': 收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数
@@ -168,7 +162,7 @@ that.iocallback = {
         //Alert.alert('系统消息', error.message || '亲，忙不过来了');
     },
     /**
-     * 成功处理。
+     * 请求成功处理。
      *
      * 收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数
      * 指定的数据类型，将返回的数据成功解析。
@@ -177,7 +171,11 @@ that.iocallback = {
      *
      * @param {Any} data 解析后的数据
      */
-    then: function(data){}
+    then: function(data){},
+    /**
+     * 请求结束处理，无论成功或失败都会调用。
+     */
+    finally: function(){}
 };
 
 module.exports = that;

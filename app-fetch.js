@@ -35,11 +35,11 @@ function formatFormData(data){
 
 module.exports = {
     /**
-     * 发起io请求
+     * 发起请求
      * @param  {JSON} ioparams 同Config.ioparams
      * @return {[type]}          [description]
      */
-    request: function(ioparams) {
+    fetch: function(ioparams) {
         if(ioparams.url == ''){
             throw new Error('io参数url不能为空');
             return;
@@ -142,10 +142,6 @@ module.exports = {
         }).catch(errorInfor => {
             if(isFunction(conf.error)){
                 conf.error(errorInfor);
-            }
-        }).finally(() => {
-            if(isFunction(conf.complete)){
-                conf.complete();
             }
         });
     }

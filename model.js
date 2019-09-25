@@ -6,13 +6,6 @@ const extend = require('extend');
  */
 
 /**
- * io请求结束后
- */
-Config.ioparams.complete = function(){
-    console.log('请求结束')
-}
-
-/**
  * 根据服务器返回的数据，判断接口成功或失败
  */
 Config.ioparams.responseTap = function(data,response){
@@ -39,7 +32,7 @@ Config.ioparams.error = function({errorType,error,response}) {
 
 module.exports = {
     fetch(params){
-        return AppFetch.request(params);
+        return AppFetch.fetch(params);
     },
     get(params){
         extend(true,params,{

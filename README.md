@@ -1,6 +1,6 @@
 # node-io-fetch
 
-为了便于业务开发，对 fetch 封装。考虑到兼容性，使用 [whatwg-fetch](https://github.com/github/fetch#readme)。此次封装提供了以下功能：
+为了便于业务开发，对 fetch 封装。此次封装提供了以下功能：
 
 1. **对所有接口增加统一的“阀门”，统一预处理 request 和 response。** 开发者只需关心具体业务，无需关心其他细节处理。这点在后期项目迭代中可渐渐发挥优势。如：开发一段时间后，后端要求所有接口都增加 ajax=1 的参数，之前遇到过的情况。如果按照普通方式，开发者需要全局搜索使用了原生 Fetch API 的地方，然后给每个接口的 data 新增 ajax=1。这一操作修改多处地方。如果开发者使用了 node-io-fetch 提供的方法，则无需烦恼，因为只需在 response “阀门” 里，对待发送的 data 新增 ajax=1。这一操作只需修改一处地方。
 2. 一般一个项目里，前后端会约定接口返回的格式，如：
@@ -16,13 +16,6 @@
 **node-io-fetch 借用 “response 阀门”，根据“接口约定”统一判断业务的成功或失败。** 此外 node-io-fetch 提供的 request method 返回 promise。结合这两点，开发者无需自行判断返回的数据，只需在成功和失败的回调里处理各自的逻辑。
 4. **新增统一的错误处理 error 入口。**。
 5. **所有的默认配置都可在项目中自行修改。**
-
-# 浏览器兼容性
-
-- Chrome
-- Firefox
-- Safari 6.1+
-- Internet Explorer 10+
 
 # 安装
 

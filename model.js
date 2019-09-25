@@ -26,7 +26,7 @@ Config.ioparams.responseTap = function(data,response){
 /**
  * 统一错误处理
  */
-Config.ioparams.error = function(errorType,error,response) {
+Config.ioparams.error = function({errorType,error,response}) {
     if(errorType == 'tap'){
         console.log(error);
     }else if(errorType == 'parse-fail' || errorType == 'status-code'){

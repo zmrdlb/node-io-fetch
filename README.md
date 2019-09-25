@@ -198,7 +198,7 @@ responseTap | function(data,response){return true;} | response 阀门，返回 b
      - 'parse-fail || 'status-code' || 'error': error 是 Error 对象，一般读取 error.message 可获取具体错误说明
   3. response，Response 对象，只有以下 errorType 才有此参数：'tap','parse-fail','status-code'
 
-- then: function(result){...}
+- then: function(data){...}
 
   收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析。经 “response 阀门” 判断，请求成功。如果 “response 阀门” 为 null，则直接判断为请求成功。
   

@@ -42,12 +42,6 @@ const extend = require('extend');
  * 设置自己的配置
  */
 
-/**
- * io请求结束后
- */
-Config.ioparams.complete = function(){
-    console.log('请求结束')
-}
 
 /**
  * 根据服务器返回的数据，判断接口成功或失败
@@ -63,7 +57,7 @@ Config.ioparams.responseTap = function(data,response){
 /**
  * 统一错误处理
  */
-Config.ioparams.error = function(errorType,error,response) {
+Config.ioparams.error = function({errorType,error,response}) {
     if(errorType == 'tap'){
         console.log(error);
     }else if(errorType == 'parse-fail' || errorType == 'status-code'){
@@ -114,8 +108,10 @@ Model.post({
      }
 }).then(function(list){ //成功
      console.log(list);
-}).catch(function(errorType,error,response){ //失败
-     console.log(errorType,error.message);
+}).catch(function({errorType,error,response}){ //失败
+     console.log(errorType,error.message,response);
+}).finally(function(){
+    console.log('请求结束')
 });
 
 ```
@@ -175,18 +171,16 @@ type | 'json' | 请求的数据类型。[数据类型和response对象获取返�
 timeout | 6000 | 超时时间，毫秒
 getResponse | function(response){} | 获取fetch返回的response对象。接口请求成功（不管业务成功或失败）可以获取到此对象
 error | function({errorType,error,response}){} | 对 fetch 请求发生的各种错误进行的统一处理。主要包括：1. status code 不在 [200,299) 范围内，统一的处理。如，未登录，弹出登录弹窗等；2. 对于错误的信息提示等。参数说明同 [iocallback.catch](#fetch-error)
-complete | function(){} | 接口请求完毕调用的方法，无论成功或失败 
 requestTap | function(request){return request;} | request 阀门，返回处理后的 Request 对象。调用时机：将 request 传递给 fetch 之前。
 responseTap | function(data,response){return true;} | response 阀门，返回 boolean 判断业务成功的与失败（true成功；false失败）。调用时机：收到了服务器返回的数据，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析。
 
-- IoConfig.iocallback：接口结果获取说明
-
-此项没有实际意义。由于AppFetch.request(...)返回的是一个Promise对象，then和catch的回调只能在此说明
+<a id="iocallback"></a>
+- IoConfig.iocallback：此项没有实际意义。对于 AppFetch.fetch(...)返回的 Promise 回调说明。
 
 <a id="fetch-error"></a>
 - catch: function({errorType,error,response}){...}
 
-  业务错误回调方法。参数说明：
+  请求失败处理。参数说明：
   
   1. errorType 错误类型
      - 'tap': 收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析，且经 “response 阀门” 判断，请求失败
@@ -198,25 +192,29 @@ responseTap | function(data,response){return true;} | response 阀门，返回 b
      - 'parse-fail || 'status-code' || 'error': error 是 Error 对象，一般读取 error.message 可获取具体错误说明
   3. response，Response 对象，只有以下 errorType 才有此参数：'tap','parse-fail','status-code'
 
-- then: function(data){...}
+- then: function(data){...}：
 
-  收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析。经 “response 阀门” 判断，请求成功。如果 “response 阀门” 为 null，则直接判断为请求成功。
+  请求成功处理。收到了服务器响应，且 status code 在 [200,299) 范围内，且根据设置的 type 参数指定的数据类型，将返回的数据成功解析。经 “response 阀门” 判断，请求成功。如果 “response 阀门” 为 null，则直接判断为请求成功。
   
   参数说明：
   
   1. data: 解析后的数据
 
+- finally: function(){}
+
+  请求结束处理，无论成功或失败都会调用。
+
 ## AppFetch
 
 Fetch 封装
 
-### AppFetch.request(ioparams)
+### AppFetch.fetch(ioparams)
 
 发起接口请求。
 
 - ioparams：格式同IoConfig.ioparams
 
-- 返回Promise对象，then和catch处理方法说明，分别对应Config.iocallback的then和catch
+- 返回Promise对象，回调说明详见[iocallback](#iocallback)
 
 # 附录
 

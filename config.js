@@ -85,7 +85,7 @@ that.ioparams = {
      *
      * 如果某个接口不想让系统默认处理，则将此值设置为 null 即可。
      */
-    error(errorType,error,response){
+    error({errorType,error,response}){
         // if(errorType == 'tap'){
         //     console.log(error);
         // }else if(errorType == 'parse-fail' || errorType == 'status-code'){
@@ -164,7 +164,7 @@ that.iocallback = {
      *      'tap','parse-fail','status-code'
      * @return {[type]} [description]
      */
-    catch: function(errorType,error,response){
+    catch: function({errorType,error,response}){
         //Alert.alert('系统消息', error.message || '亲，忙不过来了');
     },
     /**

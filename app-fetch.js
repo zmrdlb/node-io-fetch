@@ -139,9 +139,9 @@ module.exports = {
                     error: error
                 });
             });
-        }).catch(function(errorType,error,response){
+        }).catch(errorInfor => {
             if(isFunction(conf.error)){
-                conf.error(...arguments);
+                conf.error(errorInfor);
             }
         }).finally(() => {
             if(isFunction(conf.complete)){

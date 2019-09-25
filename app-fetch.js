@@ -1,7 +1,6 @@
 /**
  * @fileoverview 为了便于业务开发，对 fetch 进行了封装
  */
-require('whatwg-fetch');
 const Config = require('./config');
 const extend = require('extend');
 const querystring = require('querystring');

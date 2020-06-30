@@ -1,5 +1,5 @@
-const {Config,AppFetch} = require('node-io-fetch');
-const extend = require('extend');
+const fetchResource = require('node-io-fetch'),
+      extend = require('extend');
 
 /**
  * 设置自己的配置
@@ -8,7 +8,7 @@ const extend = require('extend');
 /**
  * 根据服务器返回的数据，判断接口成功或失败
  */
-Config.ioparams.responseTap = function(data,response){
+fetchResource.defaults.ioparams.responseTap = function(data,response){
     if(data && !data.status){
         return false; //说明发生了业务错误
     }else{
@@ -19,7 +19,7 @@ Config.ioparams.responseTap = function(data,response){
 /**
  * 统一错误处理
  */
-Config.ioparams.error = function({errorType,error,response}) {
+fetchResource.defaults.ioparams.error = function({errorType,error,response}) {
     if(errorType == 'tap'){
         console.log(error);
     }else if(errorType == 'parse-fail' || errorType == 'status-code'){
@@ -32,7 +32,7 @@ Config.ioparams.error = function({errorType,error,response}) {
 
 module.exports = {
     fetch(params){
-        return AppFetch.fetch(params);
+        return fetchResource.fetch(params);
     },
     get(params){
         extend(true,params,{

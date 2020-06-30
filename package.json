@@ -1,8 +1,8 @@
 {
   "name": "node-io-fetch",
   "version": "2.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API for fetch resource",
+  "main": "lib/index.js",
   "scripts": {
     "interstart": "node iointer.js"
   },

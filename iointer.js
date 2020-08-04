@@ -33,6 +33,7 @@ function writeres(res,req){
     res.setHeader('Content-Type','application/json');
     res.writeHead(200, 'ok');
     res.end(JSON.stringify({
+        cn: 0,
         code: 'A0001',
         data: dataBlob,
         message: '接口返回的错误信息'
@@ -42,8 +43,6 @@ function writeres(res,req){
 http.createServer((req,res) => {
     var urlobj = url.parse(req.url);
     var pathname = urlobj.pathname;
-    //
-    // console.log(urlobj.query);
 
     switch(pathname){
         case '/listdata':
